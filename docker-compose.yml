@@ -1,0 +1,32 @@
+version: '3.5'
+
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: $LOCALSTACK_NAME-postgres
+    environment:
+      POSTGRES_DB: database
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    volumes:
+      - $POSTGRES_DATA_DIRECTORY:/var/lib/postgresql/data
+      - $INIT_DATA_DIRECTORY/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - $INIT_DATA_DIRECTORY/insert_data.sql:/docker-entrypoint-initdb.d/insert_data.sql
+    ports:
+      - 5432:5432
+  keycloak:
+    image: bitnami/keycloak:latest
+    container_name: $LOCALSTACK_NAME-keycloak
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: database
+      DB_SCHEMA: public
+      DB_USER: admin
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: password
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
